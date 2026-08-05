@@ -1,0 +1,38 @@
+#include <math.h>
+#include <TM1637Display.h>
+
+#define NTC_PIN     A1
+#define LED_BLUE    6
+#define CLK_PIN     10
+#define DIO_PIN     11
+
+TM1637Display display(CLK_PIN, DIO_PIN);
+
+int tempThreshold = 28;
+void setup() {
+  pinMode(LED_BLUE, OUTPUT);
+  display.setBrightness(0x0f);
+
+}
+
+void loop() {
+  tempDetection();
+  delay(100);
+
+}
+void tempDetection() {
+  int rawAnalog = analogRead(NTC_PIN);
+  float resistance = 10000.0 / (1023.0 / rawAnalog - 1.0);
+  float temperature = (1.0 / (log(resistance / 10000.0) / 3950.0 + (1.0 / 298.15))) - 273.15;
+
+  display.showNumberDec((int)temperature);
+
+   if (temperature <= tempThreshold) 
+  {
+    digitalWrite(LED_BLUE, HIGH);    
+  } 
+  else 
+  {
+    digitalWrite(LED_BLUE, LOW);           
+  }
+}
