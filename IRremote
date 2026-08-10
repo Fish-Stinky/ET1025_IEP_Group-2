@@ -1,0 +1,28 @@
+#include <IRremote.h>
+
+#define IR_PIN 2
+#define BUZZER_PIN 3
+#define BUTTON_CODE 45
+
+int state = 0;
+
+void setup() {
+  pinMode(BUZZER_PIN, OUTPUT);
+  IrReceiver.begin(IR_PIN);
+}
+
+void loop() {
+  if (IrReceiver.decode()) {
+    if (IrReceiver.decodedIRData.command == BUTTON_CODE) {
+      state = 1 - state;
+      
+      if (state == 1) {
+        tone(BUZZER_PIN, 800);
+      } else {
+        noTone(BUZZER_PIN);  
+      }
+    }
+    IrReceiver.resume();
+  }
+
+}
