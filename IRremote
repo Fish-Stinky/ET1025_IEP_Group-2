@@ -2,7 +2,7 @@
 
 #define IR_PIN 2
 #define BUZZER_PIN 3
-#define BUTTON_CODE 45
+#define BUTTON_CODE 0x45  //(Power button on Remote)
 
 int state = 0;
 
