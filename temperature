@@ -9,23 +9,31 @@
 TM1637Display display(CLK_PIN, DIO_PIN);
 
 int tempThreshold = 28;
+
+void tempDetection(void);            
+
 void setup() {
   pinMode(LED_BLUE, OUTPUT);
+  Serial.begin(9600);                
   display.setBrightness(0x0f);
-
 }
 
 void loop() {
   tempDetection();
   delay(100);
-
 }
+
 void tempDetection() {
   int rawAnalog = analogRead(NTC_PIN);
+
+  if (rawAnalog <= 0 || rawAnalog >= 1023) return;   
+
   float resistance = 10000.0 / (1023.0 / rawAnalog - 1.0);
   float temperature = (1.0 / (log(resistance / 10000.0) / 3950.0 + (1.0 / 298.15))) - 273.15;
 
-  display.showNumberDec((int)temperature);
+  Serial.println(temperature);       
+
+  display.showNumberDec((int)temperature, false, 2, 2);   
 
    if (temperature <= tempThreshold) 
   {
