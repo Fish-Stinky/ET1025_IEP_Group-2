@@ -52,13 +52,16 @@ void setup()
   pinMode(LED_GREEN, OUTPUT);
   pinMode(LED_BLUE, OUTPUT);
   pinMode(LED_YELLOW, OUTPUT);
+  pinMode(BUTTON_K1, INPUT_PULLUP);
+  pinMode(BUTTON_K2, INPUT_PULLUP);
   
 }
 //            MAIN LOOP             //
 void loop() 
 {
   int Menu = CheckNob();    //Check nob Value
-  Serial.println(state);
+  delay(100);
+
   if (Menu != previousMenu) //only clear LEDs on menu change
   {   
     clearLEDs();
@@ -74,9 +77,14 @@ void loop()
     smartLight();
     tempDetection();
     smartFanControl();
-  }
-  OnOffSwitch();
+    }
+    if(state == 0)
+    {
+    clearLEDs();
 
+    }
+    
+  OnOffSwitch();
   }
   //Smart light
   if(Menu == 1)
@@ -97,6 +105,7 @@ void loop()
     BlinkLEDs(LED_GREEN);
     AdjHum();
   }
+
   if(Menu == 4)
   {
     BlinkLEDs(LED_RED);
@@ -109,8 +118,9 @@ int CheckNob() {
   int knobVal;
   knobVal = analogRead(KNOB_PIN);
 
-  Serial.print("Knob Value is ");
-  Serial.println(knobVal);
+  //Serial.print("Knob Value is ");
+  //Serial.println(knobVal);
+
   return (knobVal/205);
 }
 
@@ -211,6 +221,7 @@ void AdjLdr()
   disp.display(LdrSens);
 }
 
+
 void CheckPower()
 {
   if(state == 1) 
@@ -238,7 +249,7 @@ void smartLight() {
 
 void tempDetection() {
   int8_t temperature;
-  temperature = temper.getTemperature();
+  temperature = dht.readTemperature();
   Serial.print("Temp: "); Serial.println(temperature);Serial.print(" // TempTHRE: "); Serial.println(TempThreshold);
   if (TempThreshold <= temperature)
   {
@@ -284,12 +295,12 @@ void OnOffSwitch()
         state = (state == 1) ? 0 : 1;   // clean toggle between 0 and 1
 
         if (state == 1) {
-          buz.playTone(2000, 800);      // higher pitch = turning ON
+          buz.playTone(2000, 100);      // higher pitch = turning ON
           digitalWrite(LED_RED, HIGH);
         } 
         else 
         {
-          buz.playTone(500, 800);       // lower pitch = turning OFF
+          buz.playTone(500, 100);       // lower pitch = turning OFF
           digitalWrite(LED_RED, LOW);
         }
       }
