@@ -8,39 +8,59 @@
 
 TM1637Display display(CLK_PIN, DIO_PIN);
 
+float K = 0.306;
+float bValue = 3950.0;
 int tempThreshold = 28;
 
-void tempDetection(void);            
+void tempAlert(void);
 
 void setup() {
   pinMode(LED_BLUE, OUTPUT);
-  Serial.begin(9600);                
+  Serial.begin(9600);
   display.setBrightness(0x0f);
+  display.clear();                
 }
 
 void loop() {
-  tempDetection();
+  tempAlert();
   delay(100);
 }
 
-void tempDetection() {
-  int rawAnalog = analogRead(NTC_PIN);
+void tempAlert() {
+  int rawAnalog;
+  float ratio;
+  float temperature;
+  int temp;
 
-  if (rawAnalog <= 0 || rawAnalog >= 1023) return;   
+  rawAnalog = analogRead(NTC_PIN);
 
-  float resistance = 10000.0 / (1023.0 / rawAnalog - 1.0);
-  float temperature = (1.0 / (log(resistance / 10000.0) / 3950.0 + (1.0 / 298.15))) - 273.15;
-
-  Serial.println(temperature);       
-
-  display.showNumberDec((int)temperature, false, 2, 2);   
-
-   if (temperature <= tempThreshold) 
-  {
-    digitalWrite(LED_BLUE, HIGH);    
-  } 
-  else 
-  {
-    digitalWrite(LED_BLUE, LOW);           
+  if (rawAnalog <= 0 || rawAnalog >= 1023) {
+    return;
   }
+
+  ratio = K / (1023.0 / rawAnalog - 1.0);
+  temperature = 1.0 / (log(ratio) / bValue + 1.0 / 298.15) - 273.15;
+
+  temp = temperature;        
+
+  if (temp < 0) {
+    temp = 0;
+  }
+  if (temp > 99) {
+    temp = 99;
+  }
+
+  Serial.print("raw=");
+  Serial.print(rawAnalog);
+  Serial.print("  temp=");
+  Serial.println(temperature);
+
+  display.showNumberDec(temp, true, 2, 2);
+
+  if (temperature <= tempThreshold) {
+    digitalWrite(LED_BLUE, HIGH);
+  } else {
+    digitalWrite(LED_BLUE, LOW);
+  }
+}
 }
